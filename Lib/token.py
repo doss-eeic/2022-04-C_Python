@@ -57,7 +57,7 @@ ATEQUAL = 50
 RARROW = 51
 ELLIPSIS = 52
 COLONEQUAL = 53
-PREINCREMENT = 54
+INCREMENT = 54
 OP = 55
 AWAIT = 56
 ASYNC = 57
@@ -91,7 +91,7 @@ EXACT_TOKEN_TYPES = {
     '**=': DOUBLESTAREQUAL,
     '*=': STAREQUAL,
     '+': PLUS,
-    '++': PREINCREMENT,
+    '++': INCREMENT,
     '+=': PLUSEQUAL,
     ',': COMMA,
     '-': MINUS,

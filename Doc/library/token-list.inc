@@ -201,7 +201,7 @@
 
    Token value for ``":="``.
 
-.. data:: PREINCREMENT
+.. data:: INCREMENT
 
    Token value for ``"++"``.
 

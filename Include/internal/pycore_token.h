@@ -67,7 +67,7 @@ extern "C" {
 #define RARROW          51
 #define ELLIPSIS        52
 #define COLONEQUAL      53
-#define PREINCREMENT    54
+#define INCREMENT       54
 #define OP              55
 #define AWAIT           56
 #define ASYNC           57
