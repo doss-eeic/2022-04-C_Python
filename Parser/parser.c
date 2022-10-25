@@ -205,7 +205,7 @@ static char *soft_keywords[] = {
 #define shift_expr_type 1125  // Left-recursive
 #define sum_type 1126  // Left-recursive
 #define term_type 1127  // Left-recursive
-#define factor_type 1128
+#define factor_type 1128  // Left-recursive
 #define power_type 1129
 #define await_primary_type 1130
 #define primary_type 1131  // Left-recursive
@@ -13355,9 +13355,46 @@ term_raw(Parser *p)
     return _res;
 }
 
-// factor: '+' factor | '-' factor | '~' factor | power
+// Left-recursive
+// factor: '+' factor | '-' factor | '~' factor | '++' factor | factor '++' | power
+static expr_ty factor_raw(Parser *);
 static expr_ty
 factor_rule(Parser *p)
+{
+    if (p->level++ == MAXSTACK) {
+        p->error_indicator = 1;
+        PyErr_NoMemory();
+    }
+    expr_ty _res = NULL;
+    if (_PyPegen_is_memoized(p, factor_type, &_res)) {
+        p->level--;
+        return _res;
+    }
+    int _mark = p->mark;
+    int _resmark = p->mark;
+    while (1) {
+        int tmpvar_8 = _PyPegen_update_memo(p, _mark, factor_type, _res);
+        if (tmpvar_8) {
+            p->level--;
+            return _res;
+        }
+        p->mark = _mark;
+        void *_raw = factor_raw(p);
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        if (_raw == NULL || p->mark <= _resmark)
+            break;
+        _resmark = p->mark;
+        _res = _raw;
+    }
+    p->mark = _resmark;
+    p->level--;
+    return _res;
+}
+static expr_ty
+factor_raw(Parser *p)
 {
     if (p->level++ == MAXSTACK) {
         p->error_indicator = 1;
@@ -13368,10 +13405,6 @@ factor_rule(Parser *p)
         return NULL;
     }
     expr_ty _res = NULL;
-    if (_PyPegen_is_memoized(p, factor_type, &_res)) {
-        p->level--;
-        return _res;
-    }
     int _mark = p->mark;
     if (p->mark == p->fill && _PyPegen_fill_token(p) < 0) {
         p->error_indicator = 1;
@@ -13490,6 +13523,78 @@ factor_rule(Parser *p)
         D(fprintf(stderr, "%*c%s factor[%d-%d]: %s failed!\n", p->level, ' ',
                   p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'~' factor"));
     }
+    { // '++' factor
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        D(fprintf(stderr, "%*c> factor[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "'++' factor"));
+        Token * _literal;
+        expr_ty a;
+        if (
+            (_literal = _PyPegen_expect_token(p, 54))  // token='++'
+            &&
+            (a = factor_rule(p))  // factor
+        )
+        {
+            D(fprintf(stderr, "%*c+ factor[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "'++' factor"));
+            Token *_token = _PyPegen_get_last_nonnwhitespace_token(p);
+            if (_token == NULL) {
+                p->level--;
+                return NULL;
+            }
+            int _end_lineno = _token->end_lineno;
+            UNUSED(_end_lineno); // Only used by EXTRA macro
+            int _end_col_offset = _token->end_col_offset;
+            UNUSED(_end_col_offset); // Only used by EXTRA macro
+            _res = _PyAST_UnaryOp ( PreIncr , a , EXTRA );
+            if (_res == NULL && PyErr_Occurred()) {
+                p->error_indicator = 1;
+                p->level--;
+                return NULL;
+            }
+            goto done;
+        }
+        p->mark = _mark;
+        D(fprintf(stderr, "%*c%s factor[%d-%d]: %s failed!\n", p->level, ' ',
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "'++' factor"));
+    }
+    { // factor '++'
+        if (p->error_indicator) {
+            p->level--;
+            return NULL;
+        }
+        D(fprintf(stderr, "%*c> factor[%d-%d]: %s\n", p->level, ' ', _mark, p->mark, "factor '++'"));
+        Token * _literal;
+        expr_ty a;
+        if (
+            (a = factor_rule(p))  // factor
+            &&
+            (_literal = _PyPegen_expect_token(p, 54))  // token='++'
+        )
+        {
+            D(fprintf(stderr, "%*c+ factor[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "factor '++'"));
+            Token *_token = _PyPegen_get_last_nonnwhitespace_token(p);
+            if (_token == NULL) {
+                p->level--;
+                return NULL;
+            }
+            int _end_lineno = _token->end_lineno;
+            UNUSED(_end_lineno); // Only used by EXTRA macro
+            int _end_col_offset = _token->end_col_offset;
+            UNUSED(_end_col_offset); // Only used by EXTRA macro
+            _res = _PyAST_UnaryOp ( PostIncr , a , EXTRA );
+            if (_res == NULL && PyErr_Occurred()) {
+                p->error_indicator = 1;
+                p->level--;
+                return NULL;
+            }
+            goto done;
+        }
+        p->mark = _mark;
+        D(fprintf(stderr, "%*c%s factor[%d-%d]: %s failed!\n", p->level, ' ',
+                  p->error_indicator ? "ERROR!" : "-", _mark, p->mark, "factor '++'"));
+    }
     { // power
         if (p->error_indicator) {
             p->level--;
@@ -13511,7 +13616,6 @@ factor_rule(Parser *p)
     }
     _res = NULL;
   done:
-    _PyPegen_insert_memo(p, _mark, factor_type, _res);
     p->level--;
     return _res;
 }
@@ -13715,8 +13819,8 @@ primary_rule(Parser *p)
     int _mark = p->mark;
     int _resmark = p->mark;
     while (1) {
-        int tmpvar_8 = _PyPegen_update_memo(p, _mark, primary_type, _res);
-        if (tmpvar_8) {
+        int tmpvar_9 = _PyPegen_update_memo(p, _mark, primary_type, _res);
+        if (tmpvar_9) {
             p->level--;
             return _res;
         }
@@ -17907,8 +18011,8 @@ t_primary_rule(Parser *p)
     int _mark = p->mark;
     int _resmark = p->mark;
     while (1) {
-        int tmpvar_9 = _PyPegen_update_memo(p, _mark, t_primary_type, _res);
-        if (tmpvar_9) {
+        int tmpvar_10 = _PyPegen_update_memo(p, _mark, t_primary_type, _res);
+        if (tmpvar_10) {
             p->level--;
             return _res;
         }

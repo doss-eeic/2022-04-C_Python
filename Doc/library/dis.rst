@@ -451,6 +451,16 @@ result back on the stack.
    Implements ``TOS = ~TOS``.
 
 
+.. opcode:: UNARY_PREINCREMENT
+
+   Implements ``TOS = TOS + 1``.
+
+
+.. opcode:: UNARY_POSTINCREMENT
+
+   Implements ``TOS = TOS + 1``.
+
+
 .. opcode:: GET_ITER
 
    Implements ``TOS = iter(TOS)``.

@@ -1347,6 +1347,40 @@ handle_eval_breaker:
             DISPATCH();
         }
 
+        TARGET(UNARY_PREINCREMENT) {
+            PyObject *right = TOP();
+            PyObject *inv,*res;
+            //-(~x)=x+1
+            inv=PyNumber_Invert(right);
+            if (inv == NULL)
+                goto error;
+            res = PyNumber_Negative(inv);
+            Py_DECREF(inv);
+            if (res == NULL)
+                goto error;
+            Py_DECREF(right);
+            PUSH(res);
+            SET_TOP(res);
+            DISPATCH();
+        }
+
+        TARGET(UNARY_POSTINCREMENT) {
+            PyObject *right = TOP();
+            PyObject *inv,*res;
+            //-(~x)=x+1
+            inv=PyNumber_Invert(right);
+            if (inv == NULL)
+                goto error;
+            res = PyNumber_Negative(inv);
+            Py_DECREF(inv);
+            if (res == NULL)
+                goto error;
+            Py_DECREF(right);
+            PUSH(res);
+            SET_TOP(res);
+            DISPATCH();
+        }
+
         TARGET(BINARY_OP_MULTIPLY_INT) {
             assert(cframe.use_tracing == 0);
             PyObject *left = SECOND();

@@ -1041,6 +1041,8 @@ stack_effect(int opcode, int oparg, int jump)
         case UNARY_NEGATIVE:
         case UNARY_NOT:
         case UNARY_INVERT:
+        case UNARY_PREINCREMENT:
+        case UNARY_POSTINCREMENT:
             return 0;
 
         case SET_ADD:
@@ -4064,6 +4066,10 @@ unaryop(unaryop_ty op)
         return UNARY_POSITIVE;
     case USub:
         return UNARY_NEGATIVE;
+    case PreIncr:
+        return UNARY_PREINCREMENT;
+    case PostIncr:
+        return UNARY_POSTINCREMENT;
     default:
         PyErr_Format(PyExc_SystemError,
             "unary op %d should not be possible", op);
@@ -5708,8 +5714,22 @@ compiler_visit_expr1(struct compiler *c, expr_ty e)
         ADDOP_BINARY(c, e->v.BinOp.op);
         break;
     case UnaryOp_kind:
+        if (e->v.UnaryOp.op==PreIncr){
+            VISIT(c, expr, e->v.UnaryOp.operand);
+            ADDOP(c, unaryop(e->v.UnaryOp.op));
+            ADDOP_I(c, COPY, 1);
+            assert( e->v.UnaryOp.operand->kind==Name_kind);
+            compiler_nameop(c,e->v.UnaryOp.operand->v.Name.id,Store);
+        } else if (e->v.UnaryOp.op==PostIncr) {
+            VISIT(c, expr, e->v.UnaryOp.operand);
+            ADDOP(c, unaryop(e->v.UnaryOp.op));
+            //ADDOP_I(c, COPY, 1);
+            assert( e->v.UnaryOp.operand->kind==Name_kind);
+            compiler_nameop(c,e->v.UnaryOp.operand->v.Name.id,Store);
+        } else {
         VISIT(c, expr, e->v.UnaryOp.operand);
         ADDOP(c, unaryop(e->v.UnaryOp.op));
+        }
         break;
     case Lambda_kind:
         return compiler_lambda(c, e);
