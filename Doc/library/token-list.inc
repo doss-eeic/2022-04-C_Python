@@ -205,6 +205,14 @@
 
    Token value for ``"++"``.
 
+.. data:: OR_OR
+
+   Token value for ``"||"``.
+
+.. data:: AND_AND
+
+   Token value for ``"&&"``.
+
 .. data:: OP
 
 .. data:: AWAIT

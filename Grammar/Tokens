@@ -54,6 +54,9 @@ RARROW                  '->'
 ELLIPSIS                '...'
 COLONEQUAL              ':='
 INCREMENT               '++'
+OR_OR                   '||'
+AND_AND                 '&&'
+
 
 OP
 AWAIT

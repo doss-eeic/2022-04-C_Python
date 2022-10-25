@@ -58,18 +58,20 @@ RARROW = 51
 ELLIPSIS = 52
 COLONEQUAL = 53
 INCREMENT = 54
-OP = 55
-AWAIT = 56
-ASYNC = 57
-TYPE_IGNORE = 58
-TYPE_COMMENT = 59
-SOFT_KEYWORD = 60
+OR_OR = 55
+AND_AND = 56
+OP = 57
+AWAIT = 58
+ASYNC = 59
+TYPE_IGNORE = 60
+TYPE_COMMENT = 61
+SOFT_KEYWORD = 62
 # These aren't used by the C tokenizer but are needed for tokenize.py
-ERRORTOKEN = 61
-COMMENT = 62
-NL = 63
-ENCODING = 64
-N_TOKENS = 65
+ERRORTOKEN = 63
+COMMENT = 64
+NL = 65
+ENCODING = 66
+N_TOKENS = 67
 # Special definitions for cooperation with parser
 NT_OFFSET = 256
 
@@ -83,6 +85,7 @@ EXACT_TOKEN_TYPES = {
     '%': PERCENT,
     '%=': PERCENTEQUAL,
     '&': AMPER,
+    '&&': AND_AND,
     '&=': AMPEREQUAL,
     '(': LPAR,
     ')': RPAR,
@@ -125,6 +128,7 @@ EXACT_TOKEN_TYPES = {
     '{': LBRACE,
     '|': VBAR,
     '|=': VBAREQUAL,
+    '||': OR_OR,
     '}': RBRACE,
     '~': TILDE,
 }

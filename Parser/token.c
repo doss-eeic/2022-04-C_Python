@@ -61,6 +61,8 @@ const char * const _PyParser_TokenNames[] = {
     "ELLIPSIS",
     "COLONEQUAL",
     "INCREMENT",
+    "OR_OR",
+    "AND_AND",
     "OP",
     "AWAIT",
     "ASYNC",
@@ -123,6 +125,7 @@ _PyToken_TwoChars(int c1, int c2)
         break;
     case '&':
         switch (c2) {
+        case '&': return AND_AND;
         case '=': return AMPEREQUAL;
         }
         break;
@@ -186,6 +189,7 @@ _PyToken_TwoChars(int c1, int c2)
     case '|':
         switch (c2) {
         case '=': return VBAREQUAL;
+        case '|': return OR_OR;
         }
         break;
     }
